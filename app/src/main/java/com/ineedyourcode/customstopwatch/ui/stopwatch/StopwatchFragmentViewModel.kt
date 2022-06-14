@@ -45,13 +45,11 @@ class StopwatchFragmentViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             var previousTimeInSeconds = DEFAULT_PREVIOUS_TIME
             stopwatchListOrchestrator.tickerTwo.collect {
-                if (it.isNotEmpty()) {
-                    if (it.substring(6, 7) != previousTimeInSeconds) {
-                        stopwatchArrowTwo.postValue(ARROW_ROTATION_ANGLE)
-                        previousTimeInSeconds = it.substring(6, 7)
-                    }
-                    stopwatchTimeTwo.postValue(it)
+                if (it.substring(6, 7) != previousTimeInSeconds) {
+                    stopwatchArrowTwo.postValue(ARROW_ROTATION_ANGLE)
+                    previousTimeInSeconds = it.substring(6, 7)
                 }
+                stopwatchTimeTwo.postValue(it)
             }
         }
         return stopwatchTimeTwo
@@ -61,13 +59,11 @@ class StopwatchFragmentViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             var previousTimeInSeconds = DEFAULT_PREVIOUS_TIME
             stopwatchListOrchestrator.tickerOne.collect {
-                if (it.isNotEmpty()) {
-                    if (it.substring(6, 7) != previousTimeInSeconds) {
-                        stopwatchArrowOne.postValue(ARROW_ROTATION_ANGLE)
-                        previousTimeInSeconds = it.substring(6, 7)
-                    }
-                    stopwatchTimeOne.postValue(it)
+                if (it.substring(6, 7) != previousTimeInSeconds) {
+                    stopwatchArrowOne.postValue(ARROW_ROTATION_ANGLE)
+                    previousTimeInSeconds = it.substring(6, 7)
                 }
+                stopwatchTimeOne.postValue(it)
             }
         }
         return stopwatchTimeOne

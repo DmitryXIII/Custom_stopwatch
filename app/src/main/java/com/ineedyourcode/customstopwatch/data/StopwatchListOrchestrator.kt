@@ -18,8 +18,8 @@ class StopwatchListOrchestrator(
 
     private var jobOne: Job? = null
     private var jobTwo: Job? = null
-    private val mutableTickerOne = MutableStateFlow("")
-    private val mutableTickerTwo = MutableStateFlow("")
+    private val mutableTickerOne = MutableStateFlow(DEFAULT_TIME_VALUE)
+    private val mutableTickerTwo = MutableStateFlow(DEFAULT_TIME_VALUE)
     val tickerOne: StateFlow<String> = mutableTickerOne
     val tickerTwo: StateFlow<String> = mutableTickerTwo
 
@@ -72,7 +72,7 @@ class StopwatchListOrchestrator(
             }
 
             StopwatchNumber.STOPWATCH_TWO -> {
-                scopeOne.coroutineContext.cancelChildren()
+                scopeTwo.coroutineContext.cancelChildren()
                 jobTwo = null
             }
         }
