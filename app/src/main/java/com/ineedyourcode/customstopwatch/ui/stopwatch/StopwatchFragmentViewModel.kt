@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 private const val ARROW_TICKS_COUNT = 600
 private const val ARROW_ROTATION_ANGLE = 360f / ARROW_TICKS_COUNT
+private const val DEFAULT_PREVIOUS_TIME = "0"
 
 class StopwatchFragmentViewModel : ViewModel() {
 
@@ -36,22 +37,13 @@ class StopwatchFragmentViewModel : ViewModel() {
             ElapsedTimeCalculator(timestampProvider),
             TimestampMillisecondsFormatter()
         ),
-        CoroutineScope(
-            Dispatchers.IO
-                    + SupervisorJob()
-        ),
-        CoroutineScope(
-            Dispatchers.IO
-                    + SupervisorJob()
-        )
+        CoroutineScope(Dispatchers.IO + SupervisorJob()),
+        CoroutineScope(Dispatchers.IO + SupervisorJob())
     )
 
     fun getStopwatchTimeTwo(): LiveData<String> {
-        CoroutineScope(
-            Dispatchers.IO
-                    + SupervisorJob()
-        ).launch {
-            var previousTimeInSeconds = "0"
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            var previousTimeInSeconds = DEFAULT_PREVIOUS_TIME
             stopwatchListOrchestrator.tickerTwo.collect {
                 if (it.isNotEmpty()) {
                     if (it.substring(6, 7) != previousTimeInSeconds) {
@@ -66,11 +58,8 @@ class StopwatchFragmentViewModel : ViewModel() {
     }
 
     fun getStopwatchTimeOne(): LiveData<String> {
-        CoroutineScope(
-            Dispatchers.IO
-                    + SupervisorJob()
-        ).launch {
-            var previousTimeInSeconds = "0"
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            var previousTimeInSeconds = DEFAULT_PREVIOUS_TIME
             stopwatchListOrchestrator.tickerOne.collect {
                 if (it.isNotEmpty()) {
                     if (it.substring(6, 7) != previousTimeInSeconds) {
@@ -87,29 +76,15 @@ class StopwatchFragmentViewModel : ViewModel() {
     fun getStopwatchArrowOne(): LiveData<Float> = stopwatchArrowOne
     fun getStopwatchArrowTwo(): LiveData<Float> = stopwatchArrowTwo
 
-    fun startOne() {
-        stopwatchListOrchestrator.startOne()
+    fun start(stopwatchNumber: StopwatchNumber) {
+        stopwatchListOrchestrator.start(stopwatchNumber)
     }
 
-    fun pauseOne() {
-        stopwatchListOrchestrator.pauseOne()
+    fun pause(stopwatchNumber: StopwatchNumber) {
+        stopwatchListOrchestrator.pause(stopwatchNumber)
     }
 
-    fun stopOne() {
-        stopwatchListOrchestrator.stopOne()
+    fun stop(stopwatchNumber: StopwatchNumber) {
+        stopwatchListOrchestrator.stop(stopwatchNumber)
     }
-
-    fun startTwo() {
-        stopwatchListOrchestrator.startTwo()
-    }
-
-    fun pauseTwo() {
-        stopwatchListOrchestrator.pauseTwo()
-    }
-
-    fun stopTwo() {
-        stopwatchListOrchestrator.stopTwo()
-    }
-
-
 }

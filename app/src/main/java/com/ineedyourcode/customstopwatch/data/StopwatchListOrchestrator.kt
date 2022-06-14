@@ -1,15 +1,20 @@
 package com.ineedyourcode.customstopwatch.data
 
+import com.ineedyourcode.customstopwatch.domain.StopwatchNumber
+import com.ineedyourcode.customstopwatch.domain.usecase.StopwatchOrchestratorUsecase
 import com.ineedyourcode.customstopwatch.domain.StopwatchStateHolder
+import com.ineedyourcode.customstopwatch.domain.usecase.StopwatchUsecase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+
+private const val DEFAULT_TIME_VALUE = "00:00:000"
 
 class StopwatchListOrchestrator(
     private val stopwatchStateHolder: StopwatchStateHolder,
     private val scopeOne: CoroutineScope,
     private val scopeTwo: CoroutineScope,
-) {
+) : StopwatchUsecase, StopwatchOrchestratorUsecase {
 
     private var jobOne: Job? = null
     private var jobTwo: Job? = null
@@ -18,67 +23,70 @@ class StopwatchListOrchestrator(
     val tickerOne: StateFlow<String> = mutableTickerOne
     val tickerTwo: StateFlow<String> = mutableTickerTwo
 
-    fun startOne() {
-        if (jobOne == null) {
-            scopeOne.launch {
-                while (isActive) {
-                    mutableTickerOne.value = stopwatchStateHolder.getStringTimeRepresentationOne()
-                    delay(20)
+    override fun start(stopwatchNumber: StopwatchNumber) {
+        when (stopwatchNumber) {
+            StopwatchNumber.STOPWATCH_ONE -> {
+                if (jobOne == null) {
+                    scopeOne.launch {
+                        while (isActive) {
+                            mutableTickerOne.value =
+                                stopwatchStateHolder.getStringTimeRepresentationOne()
+                            delay(20)
+                        }
+                    }
+                }
+
+            }
+
+            StopwatchNumber.STOPWATCH_TWO -> {
+                if (jobTwo == null) {
+                    scopeTwo.launch {
+                        while (isActive) {
+                            mutableTickerTwo.value =
+                                stopwatchStateHolder.getStringTimeRepresentationTwo()
+                            delay(20)
+                        }
+                    }
                 }
             }
         }
-        stopwatchStateHolder.startOne()
+        stopwatchStateHolder.start(stopwatchNumber)
     }
 
-    fun startTwo() {
-        if (jobTwo == null) {
-            scopeTwo.launch {
-                while (isActive) {
-                    mutableTickerTwo.value = stopwatchStateHolder.getStringTimeRepresentationTwo()
-                    delay(20)
-                }
+    override fun pause(stopwatchNumber: StopwatchNumber) {
+        stopwatchStateHolder.pause(stopwatchNumber)
+        stopJob(stopwatchNumber)
+    }
+
+    override fun stop(stopwatchNumber: StopwatchNumber) {
+        stopwatchStateHolder.stop(stopwatchNumber)
+        stopJob(stopwatchNumber)
+        clearValue(stopwatchNumber)
+    }
+
+    override fun stopJob(stopwatchNumber: StopwatchNumber) {
+        when (stopwatchNumber) {
+            StopwatchNumber.STOPWATCH_ONE -> {
+                scopeOne.coroutineContext.cancelChildren()
+                jobOne = null
+            }
+
+            StopwatchNumber.STOPWATCH_TWO -> {
+                scopeOne.coroutineContext.cancelChildren()
+                jobTwo = null
             }
         }
-        stopwatchStateHolder.startTwo()
     }
 
-    fun pauseOne() {
-        stopwatchStateHolder.pauseOne()
-        stopJobOne()
-    }
+    override fun clearValue(stopwatchNumber: StopwatchNumber) {
+        when (stopwatchNumber) {
+            StopwatchNumber.STOPWATCH_ONE -> {
+                mutableTickerOne.value = DEFAULT_TIME_VALUE
+            }
 
-    fun pauseTwo() {
-        stopwatchStateHolder.pauseTwo()
-        stopJobTwo()
-    }
-
-    fun stopOne() {
-        stopwatchStateHolder.stopOne()
-        stopJobOne()
-        clearValueOne()
-    }
-
-    fun stopTwo() {
-        stopwatchStateHolder.stopTwo()
-        stopJobTwo()
-        clearValueTwo()
-    }
-
-    private fun stopJobOne() {
-        scopeOne.coroutineContext.cancelChildren()
-        jobOne = null
-    }
-
-    private fun stopJobTwo() {
-        scopeOne.coroutineContext.cancelChildren()
-        jobTwo = null
-    }
-
-    private fun clearValueOne() {
-        mutableTickerOne.value = "00:00:000"
-    }
-
-    private fun clearValueTwo() {
-        mutableTickerTwo.value = "00:00:000"
+            StopwatchNumber.STOPWATCH_TWO -> {
+                mutableTickerTwo.value = DEFAULT_TIME_VALUE
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.ineedyourcode.customstopwatch.R
 import com.ineedyourcode.customstopwatch.databinding.FragmentStopwatchBinding
+import com.ineedyourcode.customstopwatch.domain.StopwatchNumber
 
 class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
     private var _binding: FragmentStopwatchBinding? = null
@@ -36,29 +37,29 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
         }
 
         binding.stopwatch1StartButton.setOnClickListener {
-            viewModel.startOne()
+            viewModel.start(StopwatchNumber.STOPWATCH_ONE)
         }
 
         binding.stopwatch1PauseButton.setOnClickListener {
-            viewModel.pauseOne()
+            viewModel.pause(StopwatchNumber.STOPWATCH_ONE)
         }
 
         binding.stopwatch1StopButton.setOnClickListener {
             binding.stopwatch1ArrowView.rotation = 0f
-            viewModel.stopOne()
+            viewModel.stop(StopwatchNumber.STOPWATCH_ONE)
         }
 
         binding.stopwatch2StartButton.setOnClickListener {
-            viewModel.startTwo()
+            viewModel.start(StopwatchNumber.STOPWATCH_TWO)
         }
 
         binding.stopwatch2PauseButton.setOnClickListener {
-            viewModel.pauseTwo()
+            viewModel.pause(StopwatchNumber.STOPWATCH_TWO)
         }
 
         binding.stopwatch2StopButton.setOnClickListener {
             binding.stopwatch2ArrowView.rotation = 0f
-            viewModel.stopTwo()
+            viewModel.stop(StopwatchNumber.STOPWATCH_TWO)
         }
     }
 
