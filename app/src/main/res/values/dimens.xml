@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="null_value">0dp</dimen>
+    <dimen name="arrow_pivot_y">70dp</dimen>
+    <dimen name="arrow_pivot_x">1dp</dimen>
+    <dimen name="arrow_height">70dp</dimen>
+    <dimen name="arrow_width">2dp</dimen>
+    <dimen name="stopwatch_size">150dp</dimen>
+    <dimen name="padding_4dp">4dp</dimen>
+    <dimen name="padding_10dp">10dp</dimen>
 </resources>

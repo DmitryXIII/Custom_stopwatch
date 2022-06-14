@@ -1,14 +1,15 @@
 package com.ineedyourcode.customstopwatch.data
 
 import com.ineedyourcode.customstopwatch.domain.StopwatchNumber
-import com.ineedyourcode.customstopwatch.domain.usecase.StopwatchOrchestratorUsecase
 import com.ineedyourcode.customstopwatch.domain.StopwatchStateHolder
+import com.ineedyourcode.customstopwatch.domain.usecase.StopwatchOrchestratorUsecase
 import com.ineedyourcode.customstopwatch.domain.usecase.StopwatchUsecase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 private const val DEFAULT_TIME_VALUE = "00:00:000"
+private const val TICKER_DELAY = 20L
 
 class StopwatchListOrchestrator(
     private val stopwatchStateHolder: StopwatchStateHolder,
@@ -31,11 +32,10 @@ class StopwatchListOrchestrator(
                         while (isActive) {
                             mutableTickerOne.value =
                                 stopwatchStateHolder.getStringTimeRepresentationOne()
-                            delay(20)
+                            delay(TICKER_DELAY)
                         }
                     }
                 }
-
             }
 
             StopwatchNumber.STOPWATCH_TWO -> {
@@ -44,7 +44,7 @@ class StopwatchListOrchestrator(
                         while (isActive) {
                             mutableTickerTwo.value =
                                 stopwatchStateHolder.getStringTimeRepresentationTwo()
-                            delay(20)
+                            delay(TICKER_DELAY)
                         }
                     }
                 }

@@ -2,16 +2,18 @@ package com.ineedyourcode.customstopwatch.domain
 
 import com.ineedyourcode.customstopwatch.domain.usecase.StopwatchUsecase
 
+private const val DEFAULT_VALUE = 0L
+
 class StopwatchStateHolder(
     private val stopwatchStateCalculator: StopwatchStateCalculator,
     private val elapsedTimeCalculator: ElapsedTimeCalculator,
-    private val timestampMillisecondsFormatter: TimestampMillisecondsFormatter
+    private val timestampMillisecondsFormatter: TimestampMillisecondsFormatter,
 ) : StopwatchUsecase {
 
-    var currentStateOne: StopwatchState = StopwatchState.Paused(0)
+    var currentStateOne: StopwatchState = StopwatchState.Paused(DEFAULT_VALUE)
         private set
 
-    var currentStateTwo: StopwatchState = StopwatchState.Paused(0)
+    var currentStateTwo: StopwatchState = StopwatchState.Paused(DEFAULT_VALUE)
         private set
 
     fun getStringTimeRepresentationOne(): String {
@@ -57,11 +59,11 @@ class StopwatchStateHolder(
     override fun stop(stopwatchNumber: StopwatchNumber) {
         when (stopwatchNumber) {
             StopwatchNumber.STOPWATCH_ONE -> {
-                currentStateOne = StopwatchState.Paused(0)
+                currentStateOne = StopwatchState.Paused(DEFAULT_VALUE)
             }
 
             StopwatchNumber.STOPWATCH_TWO -> {
-                currentStateTwo = StopwatchState.Paused(0)
+                currentStateTwo = StopwatchState.Paused(DEFAULT_VALUE)
             }
         }
     }

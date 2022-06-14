@@ -3,16 +3,16 @@ package com.ineedyourcode.customstopwatch.ui.stopwatch
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import com.ineedyourcode.customstopwatch.R
 import com.ineedyourcode.customstopwatch.databinding.FragmentStopwatchBinding
 import com.ineedyourcode.customstopwatch.domain.StopwatchNumber
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
     private var _binding: FragmentStopwatchBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: StopwatchFragmentViewModel by viewModels()
+    private val viewModel: StopwatchFragmentViewModel by viewModel()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

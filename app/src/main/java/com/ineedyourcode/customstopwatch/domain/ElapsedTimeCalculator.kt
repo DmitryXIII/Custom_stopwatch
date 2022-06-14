@@ -1,5 +1,7 @@
 package com.ineedyourcode.customstopwatch.domain
 
+private const val DEFAULT_VALUE = 0L
+
 class ElapsedTimeCalculator(
     private val timestampProvider: TimestampProvider,
 ) {
@@ -9,7 +11,7 @@ class ElapsedTimeCalculator(
         val timePassedSinceStart = if (currentTimestamp > state.startTime) {
             currentTimestamp - state.startTime
         } else {
-            0
+            DEFAULT_VALUE
         }
         return timePassedSinceStart + state.elapsedTime
     }
