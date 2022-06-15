@@ -1,59 +1,63 @@
 package com.ineedyourcode.customstopwatch.ui.stopwatch
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ineedyourcode.customstopwatch.data.StopwatchListOrchestrator
 import com.ineedyourcode.customstopwatch.domain.StopwatchNumber
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+private const val DEFAULT_CURRENT_TIME = "00:00:000"
+private const val DEFAULT_ARROW_ANGLE = 0f
 private const val ARROW_TICKS_COUNT = 600
 private const val ARROW_ROTATION_ANGLE = 360f / ARROW_TICKS_COUNT
-private const val DEFAULT_PREVIOUS_TIME = '0'
+private const val DEFAULT_PREVIOUS_ONE_TENTH_VALUE = '0'
 private const val TARGET_CHAR_INDEX = 6
 
 class StopwatchFragmentViewModel(
     private val stopwatchListOrchestrator: StopwatchListOrchestrator,
 ) : ViewModel() {
 
-    private val stopwatchOneTime: MutableLiveData<String> = MutableLiveData()
-    private val stopwatchTwoTime: MutableLiveData<String> = MutableLiveData()
-    private val stopwatchOneArrow: MutableLiveData<Float> = MutableLiveData()
-    private val stopwatchTwoArrow: MutableLiveData<Float> = MutableLiveData()
+    private val _stopwatchOneDisplay: MutableStateFlow<String> = MutableStateFlow(DEFAULT_CURRENT_TIME)
+    private val _stopwatchTwoDisplay: MutableStateFlow<String> = MutableStateFlow(DEFAULT_CURRENT_TIME)
+    private val _stopwatchOneArrow: MutableStateFlow<Float> = MutableStateFlow(DEFAULT_ARROW_ANGLE)
+    private val _stopwatchTwoArrow: MutableStateFlow<Float> = MutableStateFlow(DEFAULT_ARROW_ANGLE)
+    private var currentArrowOneAngle = DEFAULT_ARROW_ANGLE
+    private var currentArrowTwoAngle = DEFAULT_ARROW_ANGLE
 
-    fun getStopwatchTimeTwo(): LiveData<String> {
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            var previousTimeInSeconds = DEFAULT_PREVIOUS_TIME
-            stopwatchListOrchestrator.tickerTwo.collect {
-                if (it.toCharArray()[6] != previousTimeInSeconds) {
-                    stopwatchTwoArrow.postValue(ARROW_ROTATION_ANGLE)
-                    previousTimeInSeconds = it.toCharArray()[TARGET_CHAR_INDEX]
-                }
-                stopwatchTwoTime.postValue(it)
-            }
-        }
-        return stopwatchTwoTime
-    }
+    val stopwatchOneDisplay: StateFlow<String> = _stopwatchOneDisplay
+    val stopwatchTwoDisplay: StateFlow<String> = _stopwatchTwoDisplay
+    val stopwatchOneArrow: StateFlow<Float> = _stopwatchOneArrow
+    val stopwatchTwoArrow: StateFlow<Float> = _stopwatchTwoArrow
 
-    fun getStopwatchTimeOne(): LiveData<String> {
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            var previousTimeInSeconds = DEFAULT_PREVIOUS_TIME
+    init {
+        viewModelScope.launch {
+            var previousOneTenthOfASecond = DEFAULT_PREVIOUS_ONE_TENTH_VALUE
             stopwatchListOrchestrator.tickerOne.collect {
-                if (it.toCharArray()[6] != previousTimeInSeconds) {
-                    stopwatchOneArrow.postValue(ARROW_ROTATION_ANGLE)
-                    previousTimeInSeconds = it.toCharArray()[TARGET_CHAR_INDEX]
+                if (it.toCharArray()[TARGET_CHAR_INDEX] != previousOneTenthOfASecond) {
+                    currentArrowOneAngle += ARROW_ROTATION_ANGLE
+                    _stopwatchOneArrow.tryEmit(currentArrowOneAngle)
+                    previousOneTenthOfASecond = it.toCharArray()[TARGET_CHAR_INDEX]
                 }
-                stopwatchOneTime.postValue(it)
+                _stopwatchOneDisplay.tryEmit(it)
+                Log.d("@@@@@@", it)
             }
         }
-        return stopwatchOneTime
-    }
 
-    fun getStopwatchArrowOne(): LiveData<Float> = stopwatchOneArrow
-    fun getStopwatchArrowTwo(): LiveData<Float> = stopwatchTwoArrow
+        viewModelScope.launch {
+            var previousOneTenthOfASecond = DEFAULT_PREVIOUS_ONE_TENTH_VALUE
+            stopwatchListOrchestrator.tickerTwo.collect {
+                if (it.toCharArray()[TARGET_CHAR_INDEX] != previousOneTenthOfASecond) {
+                    currentArrowTwoAngle += ARROW_ROTATION_ANGLE
+                    _stopwatchTwoArrow.tryEmit(currentArrowTwoAngle)
+                    previousOneTenthOfASecond = it.toCharArray()[TARGET_CHAR_INDEX]
+                }
+                _stopwatchTwoDisplay.tryEmit(it)
+            }
+        }
+    }
 
     fun start(stopwatchNumber: StopwatchNumber) {
         stopwatchListOrchestrator.start(stopwatchNumber)
@@ -64,6 +68,16 @@ class StopwatchFragmentViewModel(
     }
 
     fun stop(stopwatchNumber: StopwatchNumber) {
+        when (stopwatchNumber) {
+            StopwatchNumber.STOPWATCH_ONE -> {
+                currentArrowOneAngle = DEFAULT_ARROW_ANGLE
+                _stopwatchOneArrow.tryEmit(currentArrowOneAngle)
+            }
+            StopwatchNumber.STOPWATCH_TWO -> {
+                currentArrowTwoAngle = DEFAULT_ARROW_ANGLE
+                _stopwatchTwoArrow.tryEmit(currentArrowTwoAngle)
+            }
+        }
         stopwatchListOrchestrator.stop(stopwatchNumber)
     }
 }

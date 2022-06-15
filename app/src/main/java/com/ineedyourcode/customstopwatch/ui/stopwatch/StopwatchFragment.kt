@@ -3,9 +3,13 @@ package com.ineedyourcode.customstopwatch.ui.stopwatch
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.ineedyourcode.customstopwatch.R
 import com.ineedyourcode.customstopwatch.databinding.FragmentStopwatchBinding
 import com.ineedyourcode.customstopwatch.domain.StopwatchNumber
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
@@ -18,22 +22,13 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentStopwatchBinding.bind(view)
 
-        viewModel.getStopwatchTimeOne().observe(viewLifecycleOwner) {
-            binding.stopwatch1DisplayTextView.text = it
-
-        }
-
-        viewModel.getStopwatchTimeTwo().observe(viewLifecycleOwner) {
-            binding.stopwatch2DisplayTextView.text = it
-
-        }
-
-        viewModel.getStopwatchArrowOne().observe(viewLifecycleOwner) {
-            binding.stopwatch1ArrowView.rotation += it
-        }
-
-        viewModel.getStopwatchArrowTwo().observe(viewLifecycleOwner) {
-            binding.stopwatch2ArrowView.rotation += it
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                launch { subscribeStopwatchOneTime() }
+                launch { subscribeStopwatchTwoTime() }
+                launch { subscribeStopwatchOneArrow() }
+                launch { subscribeStopwatchTwoArrow() }
+            }
         }
 
         binding.stopwatch1StartButton.setOnClickListener {
@@ -45,7 +40,6 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
         }
 
         binding.stopwatch1StopButton.setOnClickListener {
-            binding.stopwatch1ArrowView.rotation = 0f
             viewModel.stop(StopwatchNumber.STOPWATCH_ONE)
         }
 
@@ -58,13 +52,36 @@ class StopwatchFragment : Fragment(R.layout.fragment_stopwatch) {
         }
 
         binding.stopwatch2StopButton.setOnClickListener {
-            binding.stopwatch2ArrowView.rotation = 0f
             viewModel.stop(StopwatchNumber.STOPWATCH_TWO)
         }
     }
 
+    private suspend fun subscribeStopwatchOneTime() {
+        viewModel.stopwatchOneDisplay.collect {
+            binding.stopwatch1DisplayTextView.text = it
+        }
+    }
+
+    private suspend fun subscribeStopwatchTwoTime() {
+        viewModel.stopwatchTwoDisplay.collect {
+            binding.stopwatch2DisplayTextView.text = it
+        }
+    }
+
+    private suspend fun subscribeStopwatchOneArrow() {
+        viewModel.stopwatchOneArrow.collect {
+            binding.stopwatch1ArrowView.rotation = it
+        }
+    }
+
+    private suspend fun subscribeStopwatchTwoArrow() {
+        viewModel.stopwatchTwoArrow.collect {
+            binding.stopwatch2ArrowView.rotation = it
+        }
+    }
+
     override fun onDestroyView() {
-        super.onDestroyView()
         _binding = null
+        super.onDestroyView()
     }
 }
